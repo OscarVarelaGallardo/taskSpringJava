@@ -5,10 +5,15 @@ import com.api.apirest.model.Notes;
 import com.api.apirest.model.User;
 import com.api.apirest.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.api.apirest.repository.NotesRepository;
-
+import com.api.apirest.dto.ApiResponse;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+
 @Service
 public class NoteServices {
 
@@ -18,13 +23,22 @@ public class NoteServices {
     @Autowired
     private UserRepository userRepository;
 
-    public List<Notes> getAllNotes(Long id) {
-        List<Notes> notes = notesRepository.findNotesByUserId(id);
-        if (notes.isEmpty()) {
-            throw new RuntimeException("No hay notas");
+    public ResponseEntity<ApiResponse<List<Notes>>> getAllNotesById(Long id) {
+        Optional<User> user = userRepository.findById(id);
+
+        if (user.isEmpty()) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>("error", "Usuario no encontrado", Collections.emptyList()));
         }
-        return notes;
+
+        List<Notes> notes = notesRepository.findNotesByUserId(id);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>("success", notes.isEmpty() ? "Sin notas para el usuario" : "Notas obtenidas correctamente", notes)
+        );
     }
+
     public void createNote(Long userId, NotesDto request){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
