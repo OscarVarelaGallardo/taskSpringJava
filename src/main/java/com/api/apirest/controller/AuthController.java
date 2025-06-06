@@ -1,6 +1,5 @@
 package com.api.apirest.controller;
 
-import com.api.apirest.dto.LoginUser;
 import com.api.apirest.dto.RegisterUser;
 import com.api.apirest.model.User;
 import com.api.apirest.service.AuthService;
